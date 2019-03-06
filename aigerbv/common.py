@@ -178,7 +178,9 @@ def identity_gate(wordlen, input='x', output=None):
 
 def reverse_gate(wordlen, input='x', output='rev(x)'):
     circ = identity_gate(wordlen, input, output)
-    output_map = frozenset((k, reversed(vs)) for k, vs in circ.output_map)
+    output_map = frozenset(
+        (k, tuple(reversed(vs))) for k, vs in circ.output_map
+    )
     return attr.evolve(circ, output_map=output_map)
 
 
@@ -429,9 +431,14 @@ def kmodels(wordlen: int, k: int, input=None, output=None):
     """Return a circuit taking a wordlen bitvector where only k
     valuations return True. Uses encoding from [1].
 
+    Note that this is equivalent to (~x < k).
+    - TODO: Add automated simplification so that the circuits
+            are equiv.
+
     [1]: Chakraborty, Supratik, et al. "From Weighted to Unweighted Model
     Counting." IJCAI. 2015.
     """
+
     assert 0 <= k < 2**wordlen
     if output is None:
         output = _fresh()
